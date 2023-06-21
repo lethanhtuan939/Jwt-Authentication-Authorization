@@ -1,5 +1,7 @@
 package vn.LeThanhTuan.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,8 @@ import vn.LeThanhTuan.auth.AuthenticationRequest;
 import vn.LeThanhTuan.auth.AuthenticationResponse;
 import vn.LeThanhTuan.auth.RegisterRequest;
 import vn.LeThanhTuan.service.AuthenticateService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -26,5 +30,10 @@ public class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticateService.authenticate(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        authenticateService.refreshToken(request, response);
     }
 }
