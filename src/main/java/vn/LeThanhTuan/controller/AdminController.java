@@ -12,14 +12,14 @@ public class AdminController {
     }
     @PostMapping
     public String post() {
-        return "GET admin controller";
+        return "POST admin controller";
     }
     @PutMapping
     public String put() {
-        return "GET admin controller";
+        return "PUT admin controller";
     }
     @DeleteMapping
     public String delete() {
-        return "GET admin controller";
+        return "DELETE admin controller";
     }
 }
