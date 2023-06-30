@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import vn.LeThanhTuan.entity.User;
 
 @Entity
-@Table(name = "token")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import vn.LeThanhTuan.entity.Permission;
 import vn.LeThanhTuan.entity.Role;
 
 @Configuration
@@ -28,22 +27,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable
-                )
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/**").hasAnyAuthority(Permission.ADMIN_READ.name(), Permission.MANAGER_READ.name())
-                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/**").hasAnyAuthority(Permission.ADMIN_CREATE.name(), Permission.MANAGER_CREATE.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/admin/**").hasAnyAuthority(Permission.ADMIN_UPDATE.name(), Permission.MANAGER_UPDATE.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/**").hasAnyAuthority(Permission.ADMIN_DELETE.name(), Permission.MANAGER_DELETE.name())
 
-                        .requestMatchers("/api/v1/management/**").hasAnyRole(Role.ADMIN.name(), Role.MANAGER.name())
-                        .requestMatchers(HttpMethod.GET, "/api/v1/management/**").hasAuthority(Permission.ADMIN_READ.name())
-                        .requestMatchers(HttpMethod.POST, "/api/v1/management/**").hasAuthority(Permission.ADMIN_CREATE.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/management/**").hasAuthority(Permission.ADMIN_UPDATE.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/management/**").hasAuthority(Permission.ADMIN_DELETE.name())
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/categories/category/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").hasRole(Role.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/", "/api/v1/products/product/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").hasRole(Role.ADMIN.name())
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -56,7 +51,8 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) ->
                                 SecurityContextHolder.clearContext())
-                );
+                )
+        ;
         return http.build();
     }
 }
