@@ -48,7 +48,6 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         category.setName(categoryDto.getName());
-        category.setActive(categoryDto.isActive());
         Category updatedCategory = categoryRepository.save(category);
 
         return toDto(updatedCategory);

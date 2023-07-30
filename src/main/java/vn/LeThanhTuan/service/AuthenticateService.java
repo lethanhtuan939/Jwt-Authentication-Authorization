@@ -2,7 +2,6 @@ package vn.LeThanhTuan.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.LeThanhTuan.auth.AuthenticationRequest;
 import vn.LeThanhTuan.auth.AuthenticationResponse;
 import vn.LeThanhTuan.auth.RegisterRequest;
 import vn.LeThanhTuan.entity.User;
@@ -14,9 +13,10 @@ public interface AuthenticateService {
 
     AuthenticationResponse register(RegisterRequest request);
 
-    AuthenticationResponse authenticate(AuthenticationRequest request);
+    AuthenticationResponse authenticate(AuthenticationResponse.AuthenticationRequest request);
 
     Optional<User> findByEmail(String email);
 
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+
 }

@@ -1,37 +1,21 @@
 package vn.LeThanhTuan.entity;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+@Entity
+@Table(name = "roles")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Role {
 
-@RequiredArgsConstructor
-public enum Role {
-    USER(Collections.emptySet()),
-    ADMIN(
-            Set.of(
-                    Permission.ADMIN_READ,
-                    Permission.ADMIN_UPDATE,
-                    Permission.ADMIN_CREATE,
-                    Permission.ADMIN_DELETE
-            )
-    );
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Getter
-    private final Set<Permission> permissions;
+    private String name;
 
-    public List<SimpleGrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities = getPermissions()
-                .stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.name()))
-                .collect(Collectors.toList());
-
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
-
-        return authorities;
-    }
 }

@@ -9,12 +9,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import vn.LeThanhTuan.auth.AuthenticationRequest;
 import vn.LeThanhTuan.auth.AuthenticationResponse;
 import vn.LeThanhTuan.auth.RegisterRequest;
 import vn.LeThanhTuan.config.JwtService;
-import vn.LeThanhTuan.entity.Role;
 import vn.LeThanhTuan.entity.User;
+import vn.LeThanhTuan.repository.RoleRepository;
 import vn.LeThanhTuan.repository.UserRepository;
 import vn.LeThanhTuan.service.AuthenticateService;
 import vn.LeThanhTuan.token.Token;
@@ -23,6 +22,7 @@ import vn.LeThanhTuan.token.TokenType;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
@@ -42,7 +43,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .active(true)
-                .role(Role.USER)
+                .roles(Set.of(roleRepository.findById(2).get()))
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -57,7 +58,7 @@ public class AuthenticateServiceImpl implements AuthenticateService {
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationResponse.AuthenticationRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
@@ -128,4 +129,5 @@ public class AuthenticateServiceImpl implements AuthenticateService {
             }
         }
     }
+
 }

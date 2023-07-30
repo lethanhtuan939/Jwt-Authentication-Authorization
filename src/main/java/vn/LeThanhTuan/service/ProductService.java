@@ -1,13 +1,15 @@
 package vn.LeThanhTuan.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import vn.LeThanhTuan.entity.dto.ProductDto;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ProductService {
-    ProductDto createProduct(ProductDto productDto);
+    ProductDto createProduct(ProductDto productDto, MultipartFile multipartFile) throws IOException;
 
-    ProductDto updatedProduct(ProductDto productDto, Integer id);
+    ProductDto updatedProduct(ProductDto productDto, Integer id, MultipartFile file) throws IOException;
 
     ProductDto getProductById(Integer id);
 

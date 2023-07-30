@@ -1,6 +1,5 @@
 package vn.LeThanhTuan.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,7 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import vn.LeThanhTuan.entity.Role;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -30,14 +30,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
-
-                        .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
-
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/categories/category/**").permitAll()
-                        .requestMatchers("/api/v1/categories/**").hasRole(Role.ADMIN.name())
-
-                        .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/", "/api/v1/products/product/**").permitAll()
-                        .requestMatchers("/api/v1/products/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST).hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT).hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE).hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET).permitAll()
 
                         .anyRequest().authenticated()
                 )

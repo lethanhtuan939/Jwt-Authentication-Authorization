@@ -10,9 +10,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import vn.LeThanhTuan.token.Token;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -36,25 +35,31 @@ public class User implements UserDetails {
 
     public boolean active;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role",
+            joinColumns=@JoinColumn(name="user",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="role", referencedColumnName = "id")
+    )
+    private Set<Role> roles= new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities();
+        return this.roles.stream().map(
+                    (role) -> new SimpleGrantedAuthority(role.getName()))
+                            .collect(Collectors.toList());
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return this.email;
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     @Override

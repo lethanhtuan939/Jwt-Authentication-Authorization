@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.LeThanhTuan.entity.dto.CategoryDto;
+import vn.LeThanhTuan.respone.ResponeObject;
 import vn.LeThanhTuan.service.CategoryService;
 
 import java.util.List;
@@ -17,44 +18,123 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        List<CategoryDto> categories = categoryService.getAllCategories();
+    public ResponseEntity<ResponeObject> getAllCategories() {
+        try {
+            List<CategoryDto> categories = categoryService.getAllCategories();
 
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                            .status(HttpStatus.OK.name())
+                            .message("Successfully!")
+                            .data(categories)
+                            .build());
+        }catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
-        CategoryDto savedCategory = categoryService.createCategory(categoryDto);
+    @PostMapping()
+    public ResponseEntity<ResponeObject> createCategory(@RequestBody CategoryDto categoryDto) {
+        try {
+            CategoryDto savedCategory = categoryService.createCategory(categoryDto);
 
-        return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                            .status(HttpStatus.OK.name())
+                            .message("Successfully!")
+                            .data(savedCategory)
+                            .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 
-    @GetMapping("/category/{id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Integer id) {
-        CategoryDto category = categoryService.getCategoryById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponeObject> getCategoryById(@PathVariable Integer id) {
+        try {
+            CategoryDto category = categoryService.getCategoryById(id);
 
-        return new ResponseEntity<>(category, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(category)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<CategoryDto> updatedCategory(@RequestBody CategoryDto categoryDto, @PathVariable Integer id) {
-        CategoryDto category = categoryService.updateCategory(categoryDto, id);
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponeObject> updatedCategory(@RequestBody CategoryDto categoryDto, @PathVariable Integer id) {
+        try {
+            CategoryDto category = categoryService.updateCategory(categoryDto, id);
 
-        return new ResponseEntity<>(category, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(category)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 
-    @GetMapping("/enabled/{id}")
-    public ResponseEntity<CategoryDto> enabledCategory(@PathVariable Integer id) {
-        CategoryDto category = categoryService.enabledCategory(id);
+    @DeleteMapping("/enabled/{id}")
+    public ResponseEntity<ResponeObject> enabledCategory(@PathVariable Integer id) {
 
-        return new ResponseEntity<>(category, HttpStatus.OK);
+        try {
+            CategoryDto category = categoryService.enabledCategory(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(category)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 
-    @GetMapping("/disabled/{id}")
-    public ResponseEntity<CategoryDto> disabledCategory(@PathVariable Integer id) {
-        CategoryDto category = categoryService.disabledCategory(id);
+    @DeleteMapping("/disabled/{id}")
+    public ResponseEntity<ResponeObject> disabledCategory(@PathVariable Integer id) {
+        try {
+            CategoryDto category = categoryService.disabledCategory(id);
 
-        return new ResponseEntity<>(category, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(category)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
     }
 }

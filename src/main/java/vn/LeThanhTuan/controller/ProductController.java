@@ -1,13 +1,21 @@
 package vn.LeThanhTuan.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import vn.LeThanhTuan.entity.dto.ProductDto;
+import vn.LeThanhTuan.respone.ResponeObject;
 import vn.LeThanhTuan.service.ProductService;
+import vn.LeThanhTuan.util.FileUtil;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -16,52 +24,181 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<ProductDto>> getAllProduct() {
-        List<ProductDto> products = productService.getAllProduct();
-
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    @GetMapping("/product/{id}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable Integer id) {
-        ProductDto product = productService.getProductById(id);
-
-        return new ResponseEntity<>(product, HttpStatus.OK);
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
-        ProductDto product = productService.createProduct(productDto);
-
-        return new ResponseEntity<>(product, HttpStatus.CREATED);
-    }
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ProductDto> updatedProduct(@RequestBody ProductDto productDto, @PathVariable Integer id) {
-        ProductDto product = productService.updatedProduct(productDto, id);
-
-        return new ResponseEntity<>(product, HttpStatus.OK);
-    }
-
-    @GetMapping("/enabled/{id}")
-    public ResponseEntity<ProductDto> enabledProduct(@PathVariable Integer id) {
-        ProductDto product = productService.enabledProductById(id);
-
-        return new ResponseEntity<>(product, HttpStatus.OK);
-    }
-
-    @GetMapping("/disabled/{id}")
-    public ResponseEntity<ProductDto> disabledProduct(@PathVariable Integer id) {
-        ProductDto product = productService.disabledProductById(id);
-
-        return new ResponseEntity<>(product, HttpStatus.OK);
-    }
-
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getAllProductByCategoryId(@RequestParam("category") Integer cateId) {
-        List<ProductDto> products = productService.getAllProductByCategoryId(cateId);
+    public ResponseEntity<ResponeObject> getAllProduct() {
+        try {
+            List<ProductDto> products = productService.getAllProduct();
 
-        return new ResponseEntity<>(products, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(products)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponeObject> getProductById(@PathVariable Integer id) {
+        try {
+            ProductDto product = productService.getProductById(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(product)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponeObject> createProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile){
+
+        try {
+            ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
+            ProductDto product = productService.createProduct(productDto, multipartFile);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(product)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .message("Failed to create!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ResponeObject> updatedProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile, @PathVariable Integer id) {
+        try {
+            ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
+            ProductDto product = productService.updatedProduct(productDto, id, multipartFile);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Update Successfully!")
+                    .data(product)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @DeleteMapping("/enabled/{id}")
+    public ResponseEntity<ResponeObject> enabledProduct(@PathVariable Integer id) {
+        try {
+            ProductDto product = productService.enabledProductById(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(product)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @DeleteMapping("/disabled/{id}")
+    public ResponseEntity<ResponeObject> disabledProduct(@PathVariable Integer id) {
+        try {
+            ProductDto product = productService.disabledProductById(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(product)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/category/{id}/product")
+    public ResponseEntity<ResponeObject> getAllProductByCategoryId(@PathVariable("id") Integer cateId) {
+        try {
+            List<ProductDto> products = productService.getAllProductByCategoryId(cateId);
+
+            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                    .status(HttpStatus.OK.name())
+                    .message("Successfully!")
+                    .data(products)
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
+                    .status(HttpStatus.NOT_FOUND.name())
+                    .message("Failed to get!")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/file/{fileName:.+}")
+    public ResponseEntity<byte[]> readDetailFile(@PathVariable String fileName) {
+        try {
+             byte[] bytes = FileUtil.readFileContent(fileName);
+            return  ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
+        } catch (Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/files")
+    public ResponseEntity<ResponeObject> getUploadFiles() {
+        try {
+            List<String> urls = FileUtil.loadAll()
+                    .map(path -> {
+                        String urlPath = MvcUriComponentsBuilder.fromMethodName(ProductController.class, "readDetailFile", path.getFileName().toString()).build().toUri().toString();
+                        return urlPath;
+                    })
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(ResponeObject.builder()
+                            .status(HttpStatus.OK.name())
+                            .message("List files successfully!")
+                            .data(urls)
+                            .build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(ResponeObject.builder()
+                    .status(HttpStatus.BAD_REQUEST.name())
+                    .message("List files failed!")
+                    .data(new String[] {})
+                    .build());
+        }
     }
 
 }
