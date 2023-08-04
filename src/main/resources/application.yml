@@ -12,6 +12,7 @@
       hibernate:
         ddl-auto: update
       show-sql: true
+
   application:
     security:
       jwt:
@@ -19,6 +20,9 @@
         expiration: 86400000 # 1 day
         refresh-token:
           expiration: 604800000 # 7 days
+  redis:
+    host: localhost
+    port: 6379
 #  security:
 #    security:
 #      oauth2:
