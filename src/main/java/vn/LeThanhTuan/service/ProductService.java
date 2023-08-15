@@ -1,5 +1,6 @@
 package vn.LeThanhTuan.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 import vn.LeThanhTuan.entity.dto.ProductDto;
 
@@ -13,7 +14,7 @@ public interface ProductService {
 
     ProductDto getProductById(Integer id);
 
-    List<ProductDto> getAllProduct();
+    Page<ProductDto> getAllProduct(String keyword, int pageNumber, int amountPage);
 
     ProductDto enabledProductById(Integer id);
 

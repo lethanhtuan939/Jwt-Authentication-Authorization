@@ -1,7 +1,9 @@
 package vn.LeThanhTuan.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,152 +27,91 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping
-    public ResponseEntity<ResponeObject> getAllProduct() {
-        try {
-            List<ProductDto> products = productService.getAllProduct();
+    public ResponseEntity<ResponeObject> getAllProduct( @RequestParam(value = "keyword", defaultValue = "") String keyword,
+                                                        @RequestParam(value = "p", defaultValue = "1") int pageIndex) {
+        Page<ProductDto> page = productService.getAllProduct(keyword, pageIndex, 5);
+        List<ProductDto> products = page.getContent();
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(products)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(products)
+                                            .build());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponeObject> getProductById(@PathVariable Integer id) {
-        try {
-            ProductDto product = productService.getProductById(id);
+        ProductDto product = productService.getProductById(id);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(product)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(product)
+                                            .build());
     }
 
     @PostMapping
-    public ResponseEntity<ResponeObject> createProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile){
+    public ResponseEntity<ResponeObject> createProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile) throws IOException {
 
-        try {
-            ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
-            ProductDto product = productService.createProduct(productDto, multipartFile);
+        ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
+        ProductDto product = productService.createProduct(productDto, multipartFile);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(product)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.BAD_REQUEST.name())
-                    .message("Failed to create!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(product)
+                                            .build());
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponeObject> updatedProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile, @PathVariable Integer id) {
-        try {
-            ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
-            ProductDto product = productService.updatedProduct(productDto, id, multipartFile);
+    public ResponseEntity<ResponeObject> updatedProduct(@RequestParam("data") String json, @RequestParam("file") MultipartFile multipartFile, @PathVariable Integer id) throws IOException {
+        ProductDto productDto = new ObjectMapper().readValue(json, ProductDto.class);
+        ProductDto product = productService.updatedProduct(productDto, id, multipartFile);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Update Successfully!")
-                    .data(product)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Update Successfully!")
+                                            .data(product)
+                                            .build());
     }
 
     @DeleteMapping("/enabled/{id}")
     public ResponseEntity<ResponeObject> enabledProduct(@PathVariable Integer id) {
-        try {
-            ProductDto product = productService.enabledProductById(id);
+        ProductDto product = productService.enabledProductById(id);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(product)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(product)
+                                            .build());
     }
 
     @DeleteMapping("/disabled/{id}")
     public ResponseEntity<ResponeObject> disabledProduct(@PathVariable Integer id) {
-        try {
-            ProductDto product = productService.disabledProductById(id);
+        ProductDto product = productService.disabledProductById(id);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(product)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(product)
+                                            .build());
     }
 
     @GetMapping("/category/{id}/product")
     public ResponseEntity<ResponeObject> getAllProductByCategoryId(@PathVariable("id") Integer cateId) {
-        try {
-            List<ProductDto> products = productService.getAllProductByCategoryId(cateId);
+        List<ProductDto> products = productService.getAllProductByCategoryId(cateId);
 
-            return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
-                    .status(HttpStatus.OK.name())
-                    .message("Successfully!")
-                    .data(products)
-                    .build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponeObject.builder()
-                    .status(HttpStatus.NOT_FOUND.name())
-                    .message("Failed to get!")
-                    .data(null)
-                    .build());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(ResponeObject.builder()
+                                            .status(HttpStatus.OK.name())
+                                            .message("Successfully!")
+                                            .data(products)
+                                            .build());
     }
 
     @GetMapping("/file/{fileName:.+}")
     public ResponseEntity<byte[]> readDetailFile(@PathVariable String fileName) {
         try {
-             byte[] bytes = FileUtil.readFileContent(fileName);
+            byte[] bytes = FileUtil.readFileContent(fileName);
             return  ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
         } catch (Exception e) {
             return ResponseEntity.noContent().build();

@@ -1,15 +1,17 @@
 package vn.LeThanhTuan.service.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +32,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
-    private final RedisTemplate<Object, Object> template;
 
     private ProductDto toDto(Product product) {
         return modelMapper.map(product, ProductDto.class);
@@ -55,23 +56,24 @@ public class ProductServiceImpl implements ProductService {
         Product savedProduct = productRepository.save(product);
 
         FileUtil.saveFile(fileName, multipartFile);
-        template.opsForHash().put("product", savedProduct.getId().toString(), toDto(savedProduct));
 
         return toDto(savedProduct);
     }
 
     @Override
+    @CachePut(value = "products", key = "#id")
     public ProductDto updatedProduct(ProductDto productDto, Integer id, MultipartFile file) throws IOException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         Category category = categoryRepository.findById(productDto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", productDto.getCategoryId()));
 
-        String fileName = FileUtil.generatedFileName(file);
         if(!file.isEmpty()) {
+            String fileName = FileUtil.generatedFileName(file);
             product.setImage(fileName);
             FileUtil.saveFile(fileName, file);
         }
+
         product.setName(productDto.getName());
         product.setPrice(productDto.getPrice());
         product.setDescription(productDto.getDescription());
@@ -79,61 +81,57 @@ public class ProductServiceImpl implements ProductService {
 
         Product updatedProduct = productRepository.save(product);
 
-        template.opsForHash().put("product", id.toString(), toDto(updatedProduct));
-
         return toDto(updatedProduct);
     }
 
     @Override
+    @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(Integer id) {
-        ProductDto productDto = (ProductDto) template.opsForHash().get("product", id.toString());
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
 
-        if (productDto == null) {
-            // If product is not found in cache, fetch it from the database
-            Product product = productRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+        return toDto(product);
+    }
 
-            // Put the product in the cache
-            template.opsForHash().put("product", id.toString(), toDto(product));
+    @Override
+    @Cacheable(value = "products")
+    public Page<ProductDto> getAllProduct(String keyword, int pageNumber, int amountPage) {
+        Sort sort = Sort.by("id");
+        Pageable pageable = PageRequest.of(pageNumber-1, amountPage, sort);
 
-            return toDto(product);
+        Page<Product> products;
+        if(keyword.isEmpty()) {
+            products = productRepository.findAll(pageable);
+        } else {
+            products = productRepository.findAllActiveProduct(keyword, pageable);
         }
 
-        return productDto;
+        return products.map(this::toDto);
     }
 
     @Override
-    public List<ProductDto> getAllProduct() {
-        List<Product> products = productRepository.findAll();
-        List<ProductDto> productDtos = products.stream().map(this::toDto).collect(Collectors.toList());
-        template.opsForList().rightPushAll("products", productDtos);
-
-        return productDtos;
-    }
-
-    @Override
+    @Cacheable("product")
     public ProductDto enabledProductById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         product.setActive(true);
         Product enabledProduct = productRepository.save(product);
-        template.opsForHash().put("product", id.toString(), toDto(enabledProduct));
 
         return toDto(enabledProduct);
     }
 
     @Override
+    @CacheEvict(value = "product", key = "#id")
     public ProductDto disabledProductById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
         product.setActive(false);
         Product disabledProduct = productRepository.save(product);
-        template.opsForHash().put("product", id.toString(), toDto(disabledProduct));
 
         return toDto(disabledProduct);
     }
 
     @Override
+    @Cacheable(value = "products")
     public List<ProductDto> getAllProductByCategoryId(Integer cateId) {
         List<Product> products = productRepository.findAllByCategoryId(cateId);
 

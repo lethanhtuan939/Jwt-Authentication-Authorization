@@ -29,12 +29,21 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**",
+                                "/v2/api-docs",
+                                "/v3/api-docs",
+                                "/3/api-docs/**",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "webjars/**",
+                                "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.POST).hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT).hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE).hasAnyAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET).permitAll()
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
